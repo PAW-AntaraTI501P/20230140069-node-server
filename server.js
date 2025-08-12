@@ -2,6 +2,9 @@
 require("dotenv").config();
 const express = require("express");
 const app = express();
+const todoRoutes = require("./routes/tododb.js");
+const {todos} = require("./routes/tododb.js");
+const db = require("./database/db");
 const port = process.env.PORT || 3001;
 
 // Middleware
@@ -13,20 +16,29 @@ app.use(express.json());
 // Konfigurasi EJS sebagai view engine
 app.set("view engine", "ejs");
 
-// Contoh data tugas
-let todos = [
-  { id: 1, task: "Mengerjakan PR" },
-  { id: 2, task: "Membeli bahan makanan" },
-];
+
 
 // --- Rute Utama ---
 app.get("/", (req, res) => {
   res.render("index");
 });
 
+app.use("/todos", todoRoutes);
+
 app.get("/todos-list", (req, res) => {
   res.render("todos-page", { todos: todos });
 });
+
+app.get("/todo-view", (req, res) => {
+  db.query("SELECT * FROM todos", (err, todos) => {
+    if (err) {
+      console.error("Error fetching todos:", err);
+      return res.status(500).send("Internal Server Error");
+    }
+    res.render("todo", { todos: todos });
+  });
+});
+
 
 // --- Rute CRUD ---
 // CREATE: Menambah tugas baru
