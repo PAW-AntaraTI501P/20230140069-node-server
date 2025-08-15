@@ -38,7 +38,7 @@ app.get("/contact", (req, res) => {
 app.use("/todos", todoRoutes);
 
 app.get("/todos-list", (req, res) => {
-  res.render("todos-page", { todos: todos });
+  res.render("todos-page", { todos: todos, layout: "layouts/main-layouts" });
 });
 
 app.get("/todo-view", (req, res) => {
@@ -47,7 +47,7 @@ app.get("/todo-view", (req, res) => {
       console.error("Error fetching todos:", err);
       return res.status(500).send("Internal Server Error");
     }
-    res.render("todo", { todos: todos });
+    res.render("todo", { todos: todos, layout: "layouts/main-layouts" });
   });
 });
 
