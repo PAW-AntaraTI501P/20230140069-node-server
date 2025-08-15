@@ -7,6 +7,8 @@ const {todos} = require("./routes/tododb.js");
 const db = require("./database/db");
 const port = process.env.PORT || 3001;
 
+const expressLayouts = require("express-ejs-layouts");
+app.use(expressLayouts);
 // Middleware
 const cors = require("cors");
 app.use(cors());
@@ -20,8 +22,18 @@ app.set("view engine", "ejs");
 
 // --- Rute Utama ---
 app.get("/", (req, res) => {
-  res.render("index");
+  res.render("index", {
+    layout: "layouts/main-layouts",
+  });
 });
+
+app.get("/contact", (req, res) => {
+  res.render("contact", {
+    layout: "layouts/main-layouts",
+  });
+});
+
+
 
 app.use("/todos", todoRoutes);
 
