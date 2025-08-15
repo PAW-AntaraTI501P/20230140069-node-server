@@ -3,7 +3,8 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 const todoRoutes = require("./routes/tododb.js");
-const {todos} = require("./routes/tododb.js");
+// const todoRoutes = require("./routes/todo.js"); // Uncomment this line if you want to use the dummy data route instead
+const path = require("path");
 const db = require("./database/db");
 const port = process.env.PORT || 3001;
 
@@ -18,7 +19,7 @@ app.use(express.json());
 // Konfigurasi EJS sebagai view engine
 app.set("view engine", "ejs");
 
-
+let todos = [];
 
 // --- Rute Utama ---
 app.get("/", (req, res) => {
