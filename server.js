@@ -86,6 +86,93 @@ app.post("/delete-todo/:id", (req, res) => {
   res.redirect("/todos-list");
 });
 
+
+
+// GET: Mengambil semua todos
+app.get("/api/todos", (req, res) => {
+  console.log("Menerima permintaan GET untuk todos.");
+  db.query("SELECT * FROM todos", (err, todos) => {
+    if (err) {
+      console.error("Database query error:", err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+    console.log("Berhasil mengirim todos:", todos.length, "item.");
+    res.json({ todos: todos });
+  });
+});
+
+// POST: Menambah todo baru
+app.post("/api/todos", (req, res) => {
+    const { task } = req.body;
+    console.log("Menerima permintaan POST untuk menambah task:", task);
+
+    if (!task) {
+        console.error("Task tidak ditemukan di body permintaan.");
+        return res.status(400).json({ error: 'Task is required' });
+    }
+    const query = 'INSERT INTO todos (task, completed) VALUES (?, ?)';
+    db.query(query, [task, false], (err, result) => {
+        if (err) {
+            console.error("Database insert error:", err);
+            return res.status(500).json({ error: "Internal Server Error" });
+        }
+        console.log("Todo berhasil ditambahkan dengan ID:", result.insertId);
+        res.status(201).json({ 
+            message: 'Todo added successfully', 
+            id: result.insertId,
+            task, 
+            completed: false 
+        });
+    });
+});
+
+// PUT: Memperbarui status 'completed' saja
+app.put("/api/todos/:id", (req, res) => {
+    const { id } = req.params;
+    const { completed } = req.body;
+    
+    console.log(`Menerima permintaan PUT untuk ID: ${id} dengan status completed: ${completed}`);
+
+    // Validasi input
+    if (typeof completed !== 'boolean') {
+        return res.status(400).json({ error: "Invalid 'completed' value. Must be a boolean." });
+    }
+    
+    const query = 'UPDATE todos SET completed = ? WHERE id = ?';
+
+    db.query(query, [completed, id], (err, result) => {
+        if (err) {
+            console.error("Database update error:", err);
+            return res.status(500).json({ error: "Internal Server Error" });
+        }
+        if (result.affectedRows === 0) {
+            console.error("Todo tidak ditemukan untuk ID:", id);
+            return res.status(404).json({ error: 'Todo not found' });
+        }
+        console.log(`Todo dengan ID ${id} berhasil diperbarui.`);
+        res.json({ message: 'Todo updated successfully' });
+    });
+});
+
+// DELETE: Menghapus todo berdasarkan ID
+app.delete("/api/todos/:id", (req, res) => {
+    const { id } = req.params;
+    console.log(`Menerima permintaan DELETE untuk ID: ${id}`);
+    const query = 'DELETE FROM todos WHERE id = ?';
+    db.query(query, [id], (err, result) => {
+        if (err) {
+            console.error("Database delete error:", err);
+            return res.status(500).json({ error: "Internal Server Error" });
+        }
+        if (result.affectedRows === 0) {
+            console.error("Todo tidak ditemukan untuk ID:", id);
+            return res.status(404).json({ error: 'Todo not found' });
+        }
+        console.log(`Todo dengan ID ${id} berhasil dihapus.`);
+        res.json({ message: 'Todo deleted successfully' });
+    });
+});
+
 // Middleware 404
 app.use((req, res, next) => {
   res.status(404).send("404 - page not found");
