@@ -51,9 +51,26 @@ app.get("/todo-view", (req, res) => {
 // --- API Endpoints CRUD ---
 // GET semua todos
 app.get("/api/todos", (req, res) => {
-  db.query("SELECT * FROM todos", (err, todos) => {
-    if (err) return res.status(500).json({ error: "Internal Server Error" });
-    res.json({ todos });
+  const { search } = req.query;
+  console.log(
+    `Menerima permintaan GET untuk todos. Kriteria pencarian: '${search}'`
+  );
+
+  let query = "SELECT * FROM todos";
+  const params = [];
+
+  if (search) {
+    query += " WHERE task LIKE ?";
+    params.push(`%${search}%`);
+  }
+
+  db.query(query, params, (err, todos) => {
+    if (err) {
+      console.error("Database query error:", err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+    console.log("Berhasil mengirim todos:", todos.length, "item.");
+    res.json({ todos: todos });
   });
 });
 
