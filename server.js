@@ -5,15 +5,27 @@ const app = express();
 const path = require("path");
 const db = require("./database/db");
 const port = process.env.PORT || 3001;
+const todoRoutes = require("./routes/todo");
 
 const expressLayouts = require("express-ejs-layouts");
 app.use(expressLayouts);
+
+// ----- TAMBAHKAN INI untuk import route -----
+const authRoutes = require("./routes/auth.js"); // Impor rute otentikasi
+const authMiddleware = require("./middleware/auth"); // Impor middleware otentikasi
+// --------------------------------------------
 
 // Middleware
 const cors = require("cors");
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+// ----- GUNAKAN RUTE OTENTIKASI -----
+app.use("/api/auth", authRoutes);
+
+// ----- LINDUNGI RUTE TODO DENGAN MIDDLEWARE -----
+app.use("/api/todos", authMiddleware, todoRoutes);
+
 
 // Konfigurasi view engine
 app.set("view engine", "ejs");
